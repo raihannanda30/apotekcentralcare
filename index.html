@@ -1,0 +1,525 @@
+<html lang="id">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Apotek Central Care
+  </title>
+  <link rel="icon" href="assets/logo.jpg" type="image/png">
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&amp;display=swap" rel="stylesheet"/>
+  <style>
+   body {
+            font-family: 'Roboto Condensed', sans-serif;
+        }
+        .animate-fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+        .animate-slide-in-left {
+            animation: slideInLeft 1s ease-in-out;
+        }
+        .animate-slide-in-right {
+            animation: slideInRight 1s ease-in-out;
+        }
+        .animate-slide-in-up {
+            animation: slideInUp 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+  </style>
+  <script>
+   document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("explore-services").addEventListener("click", function() {
+                document.getElementById("services").scrollIntoView({ behavior: "smooth" });
+            });
+
+    // Intersection Observer untuk animasi
+    const sections = document.querySelectorAll("section");
+    const options = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.1 // 10% dari elemen harus terlihat
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("animate-slide-in-up"); // Tambahkan kelas animasi slide-in-up
+          observer.unobserve(entry.target); // Hentikan pengamatan setelah animasi ditambahkan
+        }
+      });
+    }, options);
+
+    sections.forEach(section => {
+      observer.observe(section); // Mulai mengamati setiap section
+    });
+
+    // Menambahkan event listener untuk setiap tautan di navbar
+    const navbarLinks = document.querySelectorAll("#navbar a, #mobile-menu a");
+    navbarLinks.forEach(link => {
+      link.addEventListener("click", function(event) {
+        event.preventDefault(); // Mencegah perilaku default tautan
+        const targetId = this.getAttribute("href"); // Mendapatkan ID target dari href
+        const targetElement = document.querySelector(targetId); // Menemukan elemen target
+
+        // Menggulung ke elemen target dengan animasi halus
+        targetElement.scrollIntoView({ behavior: "smooth" });
+      });
+    });
+
+    const testimonials = document.getElementById("testimonial-container");
+    const prevButton = document.getElementById("prev-button");
+    const nextButton = document.getElementById("next-button");
+    let currentIndex = 0;
+    const totalTestimonials = testimonials.children.length;
+
+    function updateTestimonials() {
+      const offset = -currentIndex * 100; // Menggeser berdasarkan indeks
+      testimonials.style.transform = `translateX(${offset}%)`;
+    }
+
+    prevButton.addEventListener("click", function() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateTestimonials();
+      }
+    });
+
+    nextButton.addEventListener("click", function() {
+      if (currentIndex < totalTestimonials - 1) {
+        currentIndex++;
+        updateTestimonials();
+      }
+    });
+
+    // Menangani pengiriman formulir komentar
+    const commentForm = document.getElementById("comment-form");
+    const testimonialContainer = document.getElementById("testimonial-container");
+
+    commentForm.addEventListener("submit", function(event) {
+      event.preventDefault(); // Mencegah pengiriman formulir default
+
+      const name = document.getElementById("comment-name").value;
+      const comment = document.getElementById("comment-text").value;
+
+      // Mengirim data komentar ke server
+      fetch('save_comment.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          'name': name,
+          'comment': comment
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "success") {
+          // Membuat elemen baru untuk komentar
+          const newComment = document.createElement("div");
+          newComment.classList.add("bg-white", "p-6", "rounded-lg", "shadow-lg", "mt-4");
+          newComment.innerHTML = `
+            <div class="flex items-center mb-4">
+              <img src="assets/avatar1.png" alt="Avatar Pengguna" class="h-20 w-20 rounded-full mr-3">
+              <p class="text-lg italic">${comment}</p>
+            </div>
+            <p class="text-right font-semibold">- ${name}</p>
+            <div class="flex justify-end">
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+            </div>
+          `;
+
+          // Menambahkan komentar baru ke dalam container testimonial
+          testimonialContainer.appendChild(newComment);
+
+          // Mengosongkan formulir setelah pengiriman
+          commentForm.reset();
+        } else {
+          console.error('Gagal mengirim komentar:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Terjadi kesalahan:', error);
+      });
+    });
+  });
+  </script>
+ </head>
+ <body class="bg-gray-100 text-gray-800">
+  <!-- Navbar -->
+  <nav class="bg-white shadow-md fixed w-full z-10">
+   <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+    <a class="text-2xl font-bold text-[#8b95f7]" href="#">
+     <img src="assets/logo.png" alt="Logo Apotek Central Care" class="h-10 inline-block mr-2"/> Apotek Central Care
+    </a>
+    <div class="block md:hidden">
+     <button id="burger-button" class="text-gray-600 focus:outline-none">
+      <i class="fas fa-bars fa-lg"></i>
+     </button>
+    </div>
+    <div class="hidden md:flex space-x-4" id="navbar">
+     <a class="text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2 rounded-lg" href="#home">
+      Beranda
+     </a>
+     <a class="text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2 rounded-lg" href="#services">
+      Layanan
+     </a>
+     <a class="text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2 rounded-lg" href="#cabang">
+      Cabang Kami
+     </a>
+     <a class="text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2 rounded-lg" href="#about">
+      Tentang Kami
+     </a>
+     <a class="text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2 rounded-lg" href="#contact">
+      Kontak
+     </a>
+    </div>
+   </div>
+   <!-- Dropdown Menu untuk Mobile -->
+   <div class="hidden md:hidden transition duration-300 ease-in-out" id="mobile-menu">
+    <a class="block text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2" href="#home">Beranda</a>
+    <a class="block text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2" href="#services">Layanan</a>
+    <a class="block text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2" href="#cabang">Cabang Kami</a>
+    <a class="block text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2" href="#about">Tentang Kami</a>
+    <a class="block text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2" href="#contact">Kontak</a>
+   </div>
+  </nav>
+  <!-- Hero Section -->
+  <section class="bg-[#8b95f7] text-white py-20" id="home">
+   <div class="container mx-auto px-4 flex flex-col md:flex-row items-center">
+    <div class="md:w-1/2 animate-slide-in-left">
+     <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      Selamat Datang di Apotek Central Care (ACC)
+     </h1>
+     <p class="text-lg mb-6">
+      Kesehatan Anda dan Keluarga Anda adalah prioritas kami. Kami menyediakan layanan farmasi terbaik untuk Anda dan keluarga Anda.
+     </p>
+     <button class="bg-white text-[#8b95f7] px-6 py-3 rounded-full font-semibold hover:bg-gray-200" id="explore-services">
+      Jelajahi Layanan
+     </button>
+    </div>
+    <div class="md:w-1/2 mt-8 md:mt-0 animate-slide-in-right">
+     <img alt="Gambar interior apotek modern dengan rak obat-obatan dan apoteker yang ramah" height="400" src="assets/herovektor.png" width="600"/>
+    </div>
+   </div>
+  </section>
+  <!-- Services Section -->
+  <section class=" bg-[#f0f2f5] py-20" id="services">
+   <div class="container mx-auto px-4">
+    <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
+     Layanan Kami
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+     <div class="bg-white p-6 rounded-lg shadow-lg animate-slide-in-left">
+      <img alt="Ikon yang mewakili layanan resep" class="mb-4 mx-auto" height="100" src="assets/receipt.jpg" width="110"/>
+      <h3 class="text-xl font-semibold mb-2">
+       Layanan Resep
+      </h3>
+      <p>
+       Kami menyediakan layanan resep yang akurat dan tepat waktu untuk memastikan Anda mendapatkan obat yang Anda butuhkan.
+      </p>
+     </div>
+     <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in">
+      <img alt="Ikon yang mewakili obat bebas" class="mb-4 mx-auto" height="100" src="assets/obat.jpg" width="120"/>
+      <h3 class="text-xl font-semibold mb-2">
+       Obat Bebas
+      </h3>
+      <p>
+       Temukan berbagai macam obat bebas untuk penyakit umum dan kebutuhan kesehatan.
+      </p>
+     </div>
+     <div class="bg-white p-6 rounded-lg shadow-lg animate-slide-in-right">
+      <img alt="Ikon yang mewakili konsultasi kesehatan" class="mb-4 mx-auto" height="100" src="assets/konsultasi.jpg" width="150"/>
+      <h3 class="text-xl font-semibold mb-2">
+       Konsultasi Kesehatan
+      </h3>
+      <p>
+       Apoteker kami tersedia untuk konsultasi untuk membantu Anda dengan pertanyaan kesehatan dan obat-obatan Anda.
+      </p>
+     </div>
+    </div>
+   </div>
+  </section>
+  <!-- About Us Section -->
+  <section class="bg-[#8b95f7] text-white py-20" id="about">
+   <div class="container mx-auto px-4">
+    <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
+     Tentang Kami
+    </h2>
+    <div class="flex flex-col md:flex-row items-center">
+     <div class="md:w-1/2 animate-slide-in-left">
+      <img alt="Gambar tim apoteker yang bekerja bersama" height="400" src="assets/tentangkami.png" width="600"/>
+     </div>
+     <div class="md:w-1/2 md:pl-12 animate-slide-in-right">
+      <p class="text-lg mb-4">
+       Apotek Central Care telah melayani masyarakat selama lebih dari 20 tahun. Misi kami adalah menyediakan perawatan farmasi dan layanan kesehatan berkualitas tinggi kepada pelanggan kami. Kami berkomitmen untuk memastikan kesehatan dan kesejahteraan Anda melalui berbagai layanan dan saran ahli kami.
+      </p>
+      <p class="text-lg">
+       Tim apoteker dan profesional kesehatan kami yang berpengalaman siap mendukung Anda dengan semua kebutuhan kesehatan Anda. Kunjungi kami hari ini dan rasakan yang terbaik dalam perawatan farmasi.
+      </p>
+     </div>
+    </div>
+   </div>
+  </section>
+  <!-- Cabang Apotek Section -->
+  <section class="bg-[#f0f2f5] py-20" id="cabang">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
+        Apotek Cabang
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-white p-6 rounded-lg shadow-lg animate-slide-in-left">
+          <h3 class="text-xl font-semibold mb-2">APOTEK CENTRAL CARE (ACC)</h3>
+          <p>
+            Alamat :Jl. D.I Panjaitan Komplek Ruko, Jl. Bintan Center No.50 Km 9, Air Raja<br>
+            Telepon :  0811-6533-133
+          </p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in">
+          <h3 class="text-xl font-semibold mb-2">APOTEK MEJA 7 (AM7)</h3>
+          <p>
+            Alamat: Jl. Tugu Pahlawan No.27D, Bukit Cermin, Kec. Tanjungpinang Barat<br>
+            Telepon: 0813-6462-1099
+          </p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-lg animate-slide-in-right">
+          <h3 class="text-xl font-semibold mb-2">APOTEK KIJANG CENTRAL CARE</h3>
+          <p>
+            Alamat: Jl. Ps. Berdikari No.02, Kijang Kota, Kec. Bintan Tim., Kabupaten Bintan<br>
+            Telepon: 0822-8549-0885
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Kata Mereka Section -->
+  <section class="bg-gray-200 py-20" id="testimonials">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
+        Kata Mereka
+      </h2>
+      <div class="relative">
+        <button id="prev-button" class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white text-gray-600 rounded-full p-2 shadow-lg z-10">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden" id="testimonial-container">
+          <div class="bg-white p-6 rounded-lg shadow-lg animate-slide-in-left">
+            <div class="flex items-center mb-4">
+              <img src="assets/avatar1.png" alt="askara gunama" class="h-20 w-20 rounded-full mr-3">
+              <p class="text-lg italic">
+                "Apotek Central Care selalu memberikan layanan yang cepat dan ramah. Saya merasa sangat diperhatikan!"
+              </p>
+            </div>
+            <p class="text-right font-semibold">- Askara Gunama</p>
+            <div class="flex justify-end">
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+            </div>
+          </div>
+          <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in">
+            <div class="flex items-center mb-4">
+              <img src="assets/avatar1.png" alt="Avatar Pelanggan B" class="h-20 w-20 rounded-full mr-3">
+              <p class="text-lg italic">
+                "Layanan konsultasi kesehatan di sini sangat membantu. Apoteker sangat berpengetahuan dan sabar."
+              </p>
+            </div>
+            <p class="text-right font-semibold">- Asyifa Khusnul</p>
+            <div class="flex justify-end">
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+            </div>
+          </div>
+          <div class="bg-white p-6 rounded-lg shadow-lg animate-slide-in-right">
+            <div class="flex items-center mb-4">
+              <img src="assets/avatar1.png" alt="Avatar Pelanggan C" class="h-20 w-20 rounded-full mr-3">
+              <p class="text-lg italic">
+                "Saya selalu mendapatkan obat yang saya butuhkan dengan cepat. Terima kasih, Apotek Central Care!"
+              </p>
+            </div>
+            <p class="text-right font-semibold">- Aksara Fana</p>
+            <div class="flex justify-end">
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+            </div>
+          </div>
+          <div class="bg-white p-6 rounded-lg shadow-lg animate-fade-in">
+            <div class="flex items-center mb-4">
+              <img src="assets/avatar1.png" alt="Avatar Pelanggan D" class="h-20 w-20 rounded-full mr-3">
+              <p class="text-lg italic">
+                "Apotek ini adalah yang terbaik! Sangat merekomendasikan untuk semua kebutuhan kesehatan."
+              </p>
+            </div>
+            <p class="text-right font-semibold">- Fhebry Aurora</p>
+            <div class="flex justify-end">
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+            </div>
+          </div>
+        </div>
+        <button id="next-button" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white text-gray-600 rounded-full p-2 shadow-lg z-10">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+      
+      <!-- Formulir untuk menambahkan komentar baru -->
+      <div class="mt-10">
+        <h3 class="text-xl font-semibold mb-4">Tambahkan Komentar Anda</h3>
+        <form id="comment-form">
+          <div class="mb-4">
+            <label class="block text-lg font-semibold mb-2" for="comment-name">Nama</label>
+            <input class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b95f7]" id="comment-name" type="text" placeholder="Masukkan nama Anda" required />
+          </div>
+          <div class="mb-4">
+            <label class="block text-lg font-semibold mb-2" for="comment-text">Komentar</label>
+            <textarea class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b95f7]" id="comment-text" rows="4" placeholder="Tulis komentar Anda di sini..." required></textarea>
+          </div>
+          <button class="bg-[#88f2a4] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#3ab55b]" type="submit">
+            Kirim Komentar
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+  <!-- Contact Section -->
+  <section class="bg-[#8b95f7] text-white py-20" id="contact">
+   <div class="container mx-auto px-4">
+    <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
+     Hubungi Kami
+    </h2>
+    <div class="flex flex-col md:flex-row items-center">
+     <div class="md:w-1/2 animate-slide-in-left">
+      <img alt="Gambar seseorang menggunakan telepon untuk menghubungi apotek" height="400" src="assets/hubungikami.png" width="600"/>
+     </div>
+     <div class="md:w-1/2 md:pl-12 animate-slide-in-right">
+      <form>
+       <div class="mb-4">
+        <label class="block text-lg font-semibold mb-2" for="name">
+         Nama
+        </label>
+        <input class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b95f7] text-gray-600" id="name" type="text" placeholder="Masukkan nama Anda"/>
+       </div>
+       <div class="mb-4">
+        <label class="block text-lg font-semibold mb-2" for="email">
+         Email
+        </label>
+        <input class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b95f7] text-gray-600" id="email" type="email" placeholder="Masukkan email Anda"/>
+       </div>
+       <div class="mb-4">
+        <label class="block text-lg font-semibold mb-2" for="message">
+         Pesan
+        </label>
+        <textarea class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b95f7] text-gray-600" id="message" rows="4" placeholder="Tulis pesan Anda di sini..."></textarea>
+       </div>
+       <button class="bg-[#88f2a4] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#3ab55b]" type="button" onclick="sendMessage()">
+        Kirim Pesan
+       </button>
+      </form>
+     </div>
+    </div>
+   </div>
+  </section>
+  <!-- Footer -->
+  <footer class="bg-[#f0f2f5] text-gray py-6">
+   <div class="container mx-auto px-4 text-center">
+    <p>
+     © 2023 Apotek Central Care. Hak cipta dilindungi.
+    </p>
+   </div>
+  </footer>
+
+  <!-- Tombol Kembali ke Atas -->
+  <button id="back-to-top" class="fixed bottom-5 right-5 bg-[#2731f5] text-white px-4 py-2 rounded-full shadow-lg hidden" onclick="scrollToTop()">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <script>
+    // Menampilkan tombol kembali ke atas saat menggulir
+    window.onscroll = function() {
+      const button = document.getElementById("back-to-top");
+      if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+        button.classList.remove("hidden");
+      } else {
+        button.classList.add("hidden");
+      }
+    };
+
+    // Fungsi untuk menggulir kembali ke atas
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function sendMessage() {
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const message = document.getElementById("message").value;
+
+      const waNumber = "628116533133"; // Nomor WhatsApp
+      const waMessage = `Nama: ${name}\nEmail: ${email}\nPesan: ${message}`;
+      const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(waMessage)}`;
+
+      window.open(waLink, '_blank'); // Membuka WhatsApp di tab baru
+    }
+
+    document.getElementById("burger-button").addEventListener("click", function() {
+      const mobileMenu = document.getElementById("mobile-menu");
+      mobileMenu.classList.toggle("hidden");
+      mobileMenu.classList.toggle("block");
+    });
+  </script>
+ </body>
+</html>
