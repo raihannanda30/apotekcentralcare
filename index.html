@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="id">
  <head>
   <meta charset="utf-8"/>
@@ -185,6 +186,65 @@
         console.error('Terjadi kesalahan:', error);
       });
     });
+
+    let currentPage = 1; // Halaman saat ini
+
+    // Fungsi untuk mengambil komentar dari server
+    async function fetchComments(page) {
+      try {
+        const response = await fetch(`get_comments.php?page=${page}`);
+        const data = await response.json();
+
+        // Menghapus komentar yang ada sebelumnya
+        testimonialContainer.innerHTML = '';
+
+        // Menampilkan komentar baru
+        data.comments.forEach(comment => {
+          const commentElement = document.createElement("div");
+          commentElement.classList.add("bg-white", "p-6", "rounded-lg", "shadow-lg", "mt-4");
+          commentElement.innerHTML = `
+            <div class="flex items-center mb-4">
+              <img src="assets/avatar1.png" alt="Avatar Pengguna" class="h-20 w-20 rounded-full mr-3">
+              <p class="text-lg italic">${comment.comment}</p>
+            </div>
+            <p class="text-right font-semibold">- ${comment.name}</p>
+            <div class="flex justify-end">
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+              <i class="fas fa-star text-yellow-500"></i>
+            </div>
+          `;
+          testimonialContainer.appendChild(commentElement);
+        });
+
+        // Menampilkan navigasi halaman
+        updatePagination(data.totalPages);
+      } catch (error) {
+        console.error('Terjadi kesalahan:', error);
+      }
+    }
+
+    // Fungsi untuk memperbarui navigasi halaman
+    function updatePagination(totalPages) {
+      const paginationContainer = document.getElementById("pagination");
+      paginationContainer.innerHTML = '';
+
+      for (let i = 1; i <= totalPages; i++) {
+        const pageButton = document.createElement("button");
+        pageButton.innerText = i;
+        pageButton.classList.add("px-4", "py-2", "bg-blue-500", "text-white", "rounded", "mx-1");
+        pageButton.onclick = () => {
+          currentPage = i;
+          fetchComments(currentPage);
+        };
+        paginationContainer.appendChild(pageButton);
+      }
+    }
+
+    // Panggil fungsi untuk mengambil komentar saat halaman dimuat
+    fetchComments(currentPage);
   });
   </script>
  </head>
@@ -216,6 +276,9 @@
      <a class="text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2 rounded-lg" href="#contact">
       Kontak
      </a>
+     <a class="text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2 rounded-lg" href="#testimonials">
+      Kata Mereka
+     </a>
     </div>
    </div>
    <!-- Dropdown Menu untuk Mobile -->
@@ -225,6 +288,7 @@
     <a class="block text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2" href="#cabang">Cabang Kami</a>
     <a class="block text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2" href="#about">Tentang Kami</a>
     <a class="block text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2" href="#contact">Kontak</a>
+    <a class="block text-gray-600 hover:text-white hover:bg-[#4ebded] transition duration-300 ease-in-out px-4 py-2" href="#testimonials">Kata Mereka</a>
    </div>
   </nav>
   <!-- Hero Section -->
@@ -521,5 +585,7 @@
       mobileMenu.classList.toggle("block");
     });
   </script>
+
+  <div id="pagination" class="flex justify-center mt-4"></div>
  </body>
 </html>
